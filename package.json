@@ -1,8 +1,20 @@
 {
   "name": "FSEventDispatcher",
   "version": "0.0.1",
-  "private": true,
+  "description": "FSEventDispatcher, class of event management of Fantasite.JS",
   "repository": { "type": "git", "url": "git+https://github.com/MasGaNo/FSEventDispatcher.git" },
   "dependencies": {
-  }
+  },
+  "keywords": [
+	"Fantasite",
+	"event",
+	"javascript",
+	"MasGaNo"
+  ],
+  "author": "MasGaNo",
+  "license": "MIT",
+  "bugs": {
+	"url": "https://github.com/MasGaNo/FSEventDispatcher/issues"
+  },
+  "homepage": "https://github.com/MasGaNo/FSEventDispatcher"
 }
