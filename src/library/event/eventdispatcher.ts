@@ -1,12 +1,165 @@
 ﻿'use strict';
 
+/**
+
+Test:
+
+        console.log('------FSEventDispatcher------');
+
+        var e = new CEvent.EventDispatcher();
+
+        e.once('change', function () { console.log("first"); }); // should be triggered
+        var callback = function () { e.off('change', callback) };
+        e.once('change', callback); // should be triggered
+        e.once('change', function() {console.log('boubou')}); // should be triggered
+
+        e.trigger('change');
+
+        console.log('------------');
+
+        var e2 = new CEvent.EventDispatcher();
+
+        e2.once('change', function () { e2.off('change') }); // should be triggered
+        e2.once('change', function () { console.log('boubou') }); // should not be triggered
+        e2.trigger('change');
+
+        console.log('------jQuery------');
+
+        var $e = $('<div>');
+        $e.one('change', function () { console.log("first"); }); // should be triggered
+        var callback = function () { $e.off('change', callback) };
+        $e.one('change', callback); // should be triggered
+        $e.one('change', function () { console.log('boubou') }); // should be triggered
+        $e.trigger('change');
+
+        console.log('------------');
+
+        var $e2 = $('<div>');
+
+        $e2.one('change', function () { $e2.off('change') }); // should be triggered
+        $e2.one('change', function () { console.log('boubou') }); // should not be triggered
+        $e2.trigger('change');
+        
+        console.log('------Backbone------');
+
+        var bE = new Backbone.Model();
+
+        bE.once('change', function () { console.log("first"); }); // should be triggered
+        var callback = function () { bE.off('change', callback) };
+        bE.once('change', callback); // should be triggered
+        bE.once('change', function () { console.log('boubou') }); // should be triggered
+
+        bE.trigger('change');
+
+        console.log('------------');
+
+        var bE2 = new Backbone.Model();
+
+        bE2.once('change', function () { bE2.off('change') }); // should be triggered
+        bE2.once('change', function () { console.log('boubou') }); // should not be triggered
+        bE2.trigger('change');
+
+
+        return;
+
+		///
+------FSEventDispatcher------
+first
+boubou
+------------
+------jQuery------
+first
+boubou
+------------
+boubou
+------Backbone------
+first
+boubou
+------------
+boubou
+		
+**/
 
 interface EventCallback {
     callback: Function|any;
     context: any;
 }
 
-export class EventDispatcher {
+class Delegate {
+
+    private list: EventCallback[];
+    private static internalList: Function[] = [];
+
+    public constructor() {
+        this.list = [];
+    }
+
+    public add(callback: EventCallback): void {
+        this.list.push(callback);
+    }
+
+    public remove(callbackParam: EventCallback): void {
+
+        var callback = callbackParam.callback;
+        var context = callbackParam.context;
+
+        if (!callback && !context) {
+            this.list.splice(0, this.list.length);
+            for (var i = 0; i < Delegate.internalList.length; ++i) {
+                Delegate.internalList[i](-1);
+            }
+            return;
+        }
+        for (var j = this.list.length - 1; j >= 0; --j) {
+            var eventCallback = this.list[j];
+            if ((!context && (eventCallback.callback === callback || eventCallback.callback._originalCallback === callback)) ||
+                (!callback && eventCallback.context === context) ||
+                (eventCallback.context === context && (eventCallback.callback === callback || eventCallback.callback._originalCallback === callback))
+                ) {
+                this.list.splice(j, 1);
+                for (var i = 0; i < Delegate.internalList.length; ++i) {
+                    Delegate.internalList[i](j);
+                }
+            }
+        }
+	
+		/*var indexOf = -1;
+		while ((indexOf = this.list.indexOf(callback) !== -1) {
+			this.list.splice(indexOf, 1);
+			for (var i = 0; i < Delegate.internalList.length; ++i) {
+				Delegate.internalList[i](indexOf);
+			}
+		}*/
+    }
+
+    public execute(...args: any[]): void {
+
+        var currentIndex = 0;
+
+        var callbackRemove = function (position) {
+            if (position === -1) {
+                currentIndex = 0;
+                return;
+            }
+            if (currentIndex >= position) {
+                --currentIndex;
+            }
+        }
+
+        Delegate.internalList.push(callbackRemove);
+
+        for (; currentIndex < this.list.length; ++currentIndex) {
+            var event: EventCallback = this.list[currentIndex];
+            event.callback.apply(event.context, args);
+        }
+
+        Delegate.internalList.splice(Delegate.internalList.indexOf(callbackRemove), 1);
+
+    }
+
+}
+
+class EventDispatcher {
 
     // replace by delegate to avoid some case like: 
     // model.once('change', function() {model.off('change')}); // should be triggered
@@ -14,7 +167,7 @@ export class EventDispatcher {
     // or 
     // model.once('change', function() {console.log('foo')});
     // model.once('change', function() {console.log('bar')}); // crash.
-    private _events: { [s: string]: EventCallback[] };
+    private _events: { [s: string]: Delegate };
 
     constructor() {
         this._events = {};
@@ -27,8 +180,8 @@ export class EventDispatcher {
      * @param context Context of the callback to call
      **/
     public on(eventName: string, callback: Function, context?: any) {
-        var events: EventCallback[] = this._events[eventName] || (this._events[eventName] = []);
-        events.push({ callback: callback, context: context || this });
+        var events: Delegate = this._events[eventName] || (this._events[eventName] = new Delegate());
+        events.add({ callback: callback, context: context || this });
         return this;
     }
 
@@ -64,9 +217,10 @@ export class EventDispatcher {
         for (var i = 0, l = eventNames.length; i < l; ++i) {
             var name = eventNames[i];
 
-            var events: EventCallback[] = this._events[name];
+            var events: Delegate = this._events[name];
             if (events) {
-                if (!callback && !context) {
+                events.remove({ callback: callback, context: context });
+                /*if (!callback && !context) {
                     events.splice(0, events.length);
                     continue;
                 }
@@ -79,7 +233,7 @@ export class EventDispatcher {
                         ) {
                         events.splice(j, 1);
                     }
-                }
+                }*/
             }
         }
         return this;
@@ -96,11 +250,15 @@ export class EventDispatcher {
             return this;
         }
 
-        for (var i = 0; i < events.length; ++i) {
+        events.execute(args);
+		
+        /*for (var i = 0; i < events.length; ++i) {
             var event: EventCallback = events[i];
             event.callback.apply(event.context, args);
-        }
+        }*/
 
         return this;
     }
 }
+
+export = EventDispatcher;
