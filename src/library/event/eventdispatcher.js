@@ -1,5 +1,73 @@
 'use strict';
-define(["require", "exports"], function (require, exports) {
+(function (deps, factory) {
+    if (typeof module === 'object' && typeof module.exports === 'object') {
+        var v = factory(require, exports); if (v !== undefined) module.exports = v;
+    }
+    else if (typeof define === 'function' && define.amd) {
+        define(deps, factory);
+    }
+})(["require", "exports"], function (require, exports) {
+    var Delegate = (function () {
+        function Delegate() {
+            this.list = [];
+        }
+        Delegate.prototype.add = function (callback) {
+            this.list.push(callback);
+        };
+        Delegate.prototype.remove = function (callbackParam) {
+            var callback = callbackParam.callback;
+            var context = callbackParam.context;
+            if (!callback && !context) {
+                this.list.splice(0, this.list.length);
+                for (var i = 0; i < Delegate.internalList.length; ++i) {
+                    Delegate.internalList[i](-1);
+                }
+                return;
+            }
+            for (var j = this.list.length - 1; j >= 0; --j) {
+                var eventCallback = this.list[j];
+                if ((!context && (eventCallback.callback === callback || eventCallback.callback._originalCallback === callback)) ||
+                    (!callback && eventCallback.context === context) ||
+                    (eventCallback.context === context && (eventCallback.callback === callback || eventCallback.callback._originalCallback === callback))) {
+                    this.list.splice(j, 1);
+                    for (var i = 0; i < Delegate.internalList.length; ++i) {
+                        Delegate.internalList[i](j);
+                    }
+                }
+            }
+            /*var indexOf = -1;
+            while ((indexOf = this.list.indexOf(callback) !== -1) {
+                this.list.splice(indexOf, 1);
+                for (var i = 0; i < Delegate.internalList.length; ++i) {
+                    Delegate.internalList[i](indexOf);
+                }
+            }*/
+        };
+        Delegate.prototype.execute = function () {
+            var args = [];
+            for (var _i = 0; _i < arguments.length; _i++) {
+                args[_i - 0] = arguments[_i];
+            }
+            var currentIndex = 0;
+            var callbackRemove = function (position) {
+                if (position === -1) {
+                    currentIndex = 0;
+                    return;
+                }
+                if (currentIndex >= position) {
+                    --currentIndex;
+                }
+            };
+            Delegate.internalList.push(callbackRemove);
+            for (; currentIndex < this.list.length; ++currentIndex) {
+                var event = this.list[currentIndex];
+                event.callback.apply(event.context, args);
+            }
+            Delegate.internalList.splice(Delegate.internalList.indexOf(callbackRemove), 1);
+        };
+        Delegate.internalList = [];
+        return Delegate;
+    })();
     var EventDispatcher = (function () {
         function EventDispatcher() {
             this._events = {};
@@ -11,8 +79,8 @@ define(["require", "exports"], function (require, exports) {
          * @param context Context of the callback to call
          **/
         EventDispatcher.prototype.on = function (eventName, callback, context) {
-            var events = this._events[eventName] || (this._events[eventName] = []);
-            events.push({ callback: callback, context: context || this });
+            var events = this._events[eventName] || (this._events[eventName] = new Delegate());
+            events.add({ callback: callback, context: context || this });
             return this;
         };
         /**
@@ -46,17 +114,7 @@ define(["require", "exports"], function (require, exports) {
                 var name = eventNames[i];
                 var events = this._events[name];
                 if (events) {
-                    if (!callback && !context) {
-                        events.splice(0, events.length);
-                        continue;
-                    }
-                    for (var j = events.length - 1; j >= 0; --j) {
-                        var eventCallback = events[j];
-                        var remove = false;
-                        if ((!context && (eventCallback.callback === callback || eventCallback.callback._originalCallback === callback)) || (!callback && eventCallback.context === context) || (eventCallback.context === context && (eventCallback.callback === callback || eventCallback.callback._originalCallback === callback))) {
-                            events.splice(j, 1);
-                        }
-                    }
+                    events.remove({ callback: callback, context: context });
                 }
             }
             return this;
@@ -75,14 +133,15 @@ define(["require", "exports"], function (require, exports) {
             if (!events) {
                 return this;
             }
-            for (var i = 0; i < events.length; ++i) {
-                var event = events[i];
+            events.execute(args);
+            /*for (var i = 0; i < events.length; ++i) {
+                var event: EventCallback = events[i];
                 event.callback.apply(event.context, args);
-            }
+            }*/
             return this;
         };
         return EventDispatcher;
     })();
-    exports.EventDispatcher = EventDispatcher;
+    return EventDispatcher;
 });
 //# sourceMappingURL=eventdispatcher.js.map
