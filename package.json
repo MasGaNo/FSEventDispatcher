@@ -16,5 +16,6 @@
   "bugs": {
 	"url": "https://github.com/MasGaNo/FSEventDispatcher/issues"
   },
-  "homepage": "https://github.com/MasGaNo/FSEventDispatcher"
+  "homepage": "https://github.com/MasGaNo/FSEventDispatcher",
+  "main": "src/library/event/eventdispatcher.js"
 }
