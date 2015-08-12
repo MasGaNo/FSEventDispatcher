@@ -250,7 +250,7 @@ class EventDispatcher {
             return this;
         }
 
-        events.execute(args);
+        events.execute.apply(events, args);
 		
         /*for (var i = 0; i < events.length; ++i) {
             var event: EventCallback = events[i];
