@@ -9,6 +9,7 @@
 })(["require", "exports"], function (require, exports) {
     var Delegate = (function () {
         function Delegate() {
+            this.internalList = [];
             this.list = [];
         }
         Delegate.prototype.add = function (callback) {
@@ -19,8 +20,8 @@
             var context = callbackParam.context;
             if (!callback && !context) {
                 this.list.splice(0, this.list.length);
-                for (var i = 0; i < Delegate.internalList.length; ++i) {
-                    Delegate.internalList[i](-1);
+                for (var i = 0; i < this.internalList.length; ++i) {
+                    this.internalList[i](-1);
                 }
                 return;
             }
@@ -30,8 +31,8 @@
                     (!callback && eventCallback.context === context) ||
                     (eventCallback.context === context && (eventCallback.callback === callback || eventCallback.callback._originalCallback === callback))) {
                     this.list.splice(j, 1);
-                    for (var i = 0; i < Delegate.internalList.length; ++i) {
-                        Delegate.internalList[i](j);
+                    for (var i = 0; i < this.internalList.length; ++i) {
+                        this.internalList[i](j);
                     }
                 }
             }
@@ -54,18 +55,17 @@
                     currentIndex = 0;
                     return;
                 }
-                if (currentIndex >= position) {
+                if (currentIndex && currentIndex >= position) {
                     --currentIndex;
                 }
             };
-            Delegate.internalList.push(callbackRemove);
+            this.internalList.push(callbackRemove);
             for (; currentIndex < this.list.length; ++currentIndex) {
                 var event = this.list[currentIndex];
                 event.callback.apply(event.context, args);
             }
-            Delegate.internalList.splice(Delegate.internalList.indexOf(callbackRemove), 1);
+            this.internalList.splice(this.internalList.indexOf(callbackRemove), 1);
         };
-        Delegate.internalList = [];
         return Delegate;
     })();
     var EventDispatcher = (function () {
@@ -144,4 +144,3 @@
     })();
     return EventDispatcher;
 });
-//# sourceMappingURL=eventdispatcher.js.map
