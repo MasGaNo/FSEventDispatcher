@@ -1,0 +1,11 @@
+{
+    "compilerOptions": {
+        "target": "es5",
+        "module": "umd",
+        "sourceMap": true,
+        "declaration": false
+    },
+    "files": [
+        "src/library/event/eventdispatcher.ts"
+    ]
+}

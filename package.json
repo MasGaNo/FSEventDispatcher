@@ -1,6 +1,6 @@
 {
   "name": "FSEventDispatcher",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "FSEventDispatcher, class of event management of Fantasite.JS",
   "repository": { "type": "git", "url": "git+https://github.com/MasGaNo/FSEventDispatcher.git" },
   "dependencies": {
