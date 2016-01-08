@@ -60,11 +60,16 @@
                 }
             };
             this.internalList.push(callbackRemove);
+            var returnValue = [];
             for (; currentIndex < this.list.length; ++currentIndex) {
-                var event = this.list[currentIndex];
-                event.callback.apply(event.context, args);
+                var event_1 = this.list[currentIndex];
+                var returnVal = event_1.callback.apply(event_1.context, args);
+                if (returnVal !== undefined) {
+                    returnValue.push(returnVal);
+                }
             }
             this.internalList.splice(this.internalList.indexOf(callbackRemove), 1);
+            return returnValue;
         };
         return Delegate;
     })();
@@ -139,6 +144,22 @@
                 event.callback.apply(event.context, args);
             }*/
             return this;
+        };
+        /**
+         * Same as trigger method, but also return all values returned by callbacks except undefined value.
+         * @param eventName Name of the event to triggered
+         * @param args All arguments to pass to the callbacks.
+         **/
+        EventDispatcher.prototype.triggerResult = function (eventName) {
+            var args = [];
+            for (var _i = 1; _i < arguments.length; _i++) {
+                args[_i - 1] = arguments[_i];
+            }
+            var events = this._events[eventName];
+            if (!events) {
+                return [];
+            }
+            return events.execute.apply(events, args);
         };
         return EventDispatcher;
     })();

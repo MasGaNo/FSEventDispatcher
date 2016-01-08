@@ -132,11 +132,11 @@ class Delegate {
 		}*/
     }
 
-    public execute(...args: any[]): void {
+    public execute(...args: any[]): any[] {
 
-        var currentIndex = 0;
+        let currentIndex = 0;
 
-        var callbackRemove = function (position) {
+        let callbackRemove = function (position) {
             if (position === -1) {
                 currentIndex = 0;
                 return;
@@ -148,12 +148,19 @@ class Delegate {
 
         this.internalList.push(callbackRemove);
 
+		let returnValue: any[] = [];
+		
         for (; currentIndex < this.list.length; ++currentIndex) {
-            var event: EventCallback = this.list[currentIndex];
-            event.callback.apply(event.context, args);
+            let event: EventCallback = this.list[currentIndex];
+            let returnVal = event.callback.apply(event.context, args);
+			if (returnVal !== undefined) {
+				returnValue.push(returnVal);				
+			}
         }
 
         this.internalList.splice(this.internalList.indexOf(callbackRemove), 1);
+		
+		return returnValue;
 
     }
 
@@ -258,6 +265,21 @@ class EventDispatcher {
         }*/
 
         return this;
+    }
+	
+	/**
+     * Same as trigger method, but also return all values returned by callbacks except undefined value.
+     * @param eventName Name of the event to triggered
+     * @param args All arguments to pass to the callbacks.
+     **/
+    public triggerResult(eventName: string, ...args: any[]): any[] {
+        var events = this._events[eventName];
+        if (!events) {
+            return [];
+        }
+
+        return events.execute.apply(events, args);
+		
     }
 }
 
