@@ -168,6 +168,9 @@ class Delegate {
 
 class EventDispatcher {
 
+	/**
+	 * Internal Mediator.
+	 */
 	public static Mediator = new EventDispatcher();
 
     // replace by delegate to avoid some case like: 
