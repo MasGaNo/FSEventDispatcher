@@ -168,6 +168,8 @@ class Delegate {
 
 class EventDispatcher {
 
+	public static Mediator = new EventDispatcher();
+
     // replace by delegate to avoid some case like: 
     // model.once('change', function() {model.off('change')}); // should be triggered
     // model.once('change', function() {console.log('boubou')}); // should not be triggered

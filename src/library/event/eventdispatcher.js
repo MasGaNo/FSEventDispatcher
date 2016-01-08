@@ -161,6 +161,7 @@
             }
             return events.execute.apply(events, args);
         };
+        EventDispatcher.Mediator = new EventDispatcher();
         return EventDispatcher;
     })();
     return EventDispatcher;
