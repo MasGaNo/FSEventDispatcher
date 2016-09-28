@@ -288,4 +288,4 @@ class EventDispatcher {
     }
 }
 
-export = EventDispatcher;
+export default EventDispatcher;

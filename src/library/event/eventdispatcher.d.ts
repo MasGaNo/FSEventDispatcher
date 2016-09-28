@@ -39,4 +39,4 @@ declare class EventDispatcher {
      **/
     triggerResult(eventName: string, ...args: any[]): any[];
 }
-export = EventDispatcher;
+export default EventDispatcher;

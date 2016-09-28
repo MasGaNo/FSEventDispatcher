@@ -167,6 +167,7 @@
         EventDispatcher.Mediator = new EventDispatcher();
         return EventDispatcher;
     }());
-    return EventDispatcher;
+    Object.defineProperty(exports, "__esModule", { value: true });
+    exports.default = EventDispatcher;
 });
 //# sourceMappingURL=eventdispatcher.js.map
