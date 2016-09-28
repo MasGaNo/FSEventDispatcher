@@ -1,4 +1,3 @@
-'use strict';
 (function (factory) {
     if (typeof module === 'object' && typeof module.exports === 'object') {
         var v = factory(require, exports); if (v !== undefined) module.exports = v;
@@ -7,6 +6,7 @@
         define(["require", "exports"], factory);
     }
 })(function (require, exports) {
+    'use strict';
     var Delegate = (function () {
         function Delegate() {
             this.internalList = [];
@@ -72,7 +72,7 @@
             return returnValue;
         };
         return Delegate;
-    })();
+    }());
     var EventDispatcher = (function () {
         function EventDispatcher() {
             this._events = {};
@@ -161,9 +161,12 @@
             }
             return events.execute.apply(events, args);
         };
+        /**
+         * Internal Mediator.
+         */
         EventDispatcher.Mediator = new EventDispatcher();
         return EventDispatcher;
-    })();
+    }());
     return EventDispatcher;
 });
 //# sourceMappingURL=eventdispatcher.js.map

@@ -1,11 +1,16 @@
 {
     "compilerOptions": {
         "target": "es5",
+        "noImplicitAny": true,
         "module": "umd",
         "sourceMap": true,
-        "declaration": false
+        "declaration": true,
+        "removeComments": false
     },
     "files": [
         "src/library/event/eventdispatcher.ts"
+    ],
+    "exclude": [
+        "node_modules"
     ]
 }

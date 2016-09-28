@@ -136,7 +136,7 @@ class Delegate {
 
         let currentIndex = 0;
 
-        let callbackRemove = function (position) {
+        let callbackRemove = function (position:number) {
             if (position === -1) {
                 currentIndex = 0;
                 return;
