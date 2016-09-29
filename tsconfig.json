@@ -4,6 +4,7 @@
         "noImplicitAny": true,
         "module": "umd",
         "sourceMap": true,
+        "outDir": "./dist",
         "declaration": true,
         "removeComments": false
     },

@@ -2,30 +2,29 @@
   "name": "fseventdispatcher",
   "version": "0.2.0",
   "description": "FSEventDispatcher, class of event management of Fantasite.JS",
-  "main": "./src/library/event/eventdispatcher.js",
-  "types": "./src/library/event/eventdispatcher.d.ts",
+  "main": "./dist/eventdispatcher.js",
+  "types": "./dist/eventdispatcher.d.ts",
+  "scripts": {
+    "start": "./node_modules/typescript/bin/tsc --watch"
+  },
+  "devDependencies": {
+    "typescript": "2.0.3"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/MasGaNo/FSEventDispatcher.git"
   },
-  "dependencies": {},
-  "devDependencies": {
-    "typescript": "2.0.3"
+  "author": "MasGaNo",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/MasGaNo/FSEventDispatcher/issues"
   },
-  "scripts": {
-    "start": "./node_modules/typescript/bin/tsc --watch"
-  },
+  "homepage": "https://github.com/MasGaNo/FSEventDispatcher",
   "keywords": [
     "Fantasite",
     "event",
     "javascript",
     "TypeScript",
     "MasGaNo"
-  ],
-  "author": "MasGaNo",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/MasGaNo/FSEventDispatcher/issues"
-  },
-  "homepage": "https://github.com/MasGaNo/FSEventDispatcher"
+  ]
 }
