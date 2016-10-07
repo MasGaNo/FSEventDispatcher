@@ -73,8 +73,8 @@
         };
         return Delegate;
     }());
-    var EventDispatcher = (function () {
-        function EventDispatcher() {
+    var FSEventDispatcher = (function () {
+        function FSEventDispatcher() {
             this._events = {};
         }
         /**
@@ -83,7 +83,7 @@
          * @param callback Callback to call when the event fires
          * @param context Context of the callback to call
          **/
-        EventDispatcher.prototype.on = function (eventName, callback, context) {
+        FSEventDispatcher.prototype.on = function (eventName, callback, context) {
             var events = this._events[eventName] || (this._events[eventName] = new Delegate());
             events.add({ callback: callback, context: context || this });
             return this;
@@ -94,7 +94,7 @@
          * @param callback Callback to call when the event fires
          * @param context Context of the callback to call
          **/
-        EventDispatcher.prototype.once = function (eventName, callback, context) {
+        FSEventDispatcher.prototype.once = function (eventName, callback, context) {
             var self = this; //not bind because we need to keep the trigger context
             var onceCallback = function () {
                 self.off(eventName, onceCallback, context);
@@ -109,7 +109,7 @@
          * @param callback Callback to remove for the event. If null remove all callback with this `context` for the event.
          * @param context Context of the callback to remove. If null remove all callback with this callback.
          **/
-        EventDispatcher.prototype.off = function (eventName, callback, context) {
+        FSEventDispatcher.prototype.off = function (eventName, callback, context) {
             if (!eventName && !callback && !context) {
                 this._events = {}; // recursive clean?
                 return this;
@@ -129,7 +129,7 @@
          * @param eventName Name of the event to triggered
          * @param args All arguments to pass to the callbacks.
          **/
-        EventDispatcher.prototype.trigger = function (eventName) {
+        FSEventDispatcher.prototype.trigger = function (eventName) {
             var args = [];
             for (var _i = 1; _i < arguments.length; _i++) {
                 args[_i - 1] = arguments[_i];
@@ -150,7 +150,7 @@
          * @param eventName Name of the event to triggered
          * @param args All arguments to pass to the callbacks.
          **/
-        EventDispatcher.prototype.triggerResult = function (eventName) {
+        FSEventDispatcher.prototype.triggerResult = function (eventName) {
             var args = [];
             for (var _i = 1; _i < arguments.length; _i++) {
                 args[_i - 1] = arguments[_i];
@@ -164,9 +164,10 @@
         /**
          * Internal Mediator.
          */
-        EventDispatcher.Mediator = new EventDispatcher();
-        return EventDispatcher;
+        FSEventDispatcher.Mediator = new FSEventDispatcher();
+        return FSEventDispatcher;
     }());
-    return EventDispatcher;
+    Object.defineProperty(exports, "__esModule", { value: true });
+    exports.default = FSEventDispatcher;
 });
 //# sourceMappingURL=eventdispatcher.js.map

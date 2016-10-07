@@ -166,12 +166,12 @@ class Delegate {
 
 }
 
-class EventDispatcher {
+class FSEventDispatcher {
 
 	/**
 	 * Internal Mediator.
 	 */
-	public static Mediator = new EventDispatcher();
+	public static Mediator = new FSEventDispatcher();
 
     // replace by delegate to avoid some case like: 
     // model.once('change', function() {model.off('change')}); // should be triggered
@@ -288,4 +288,4 @@ class EventDispatcher {
     }
 }
 
-export = EventDispatcher;
+export default FSEventDispatcher;

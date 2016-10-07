@@ -1,8 +1,8 @@
-declare class EventDispatcher {
+declare class FSEventDispatcher {
     /**
      * Internal Mediator.
      */
-    static Mediator: EventDispatcher;
+    static Mediator: FSEventDispatcher;
     private _events;
     constructor();
     /**
@@ -39,4 +39,4 @@ declare class EventDispatcher {
      **/
     triggerResult(eventName: string, ...args: any[]): any[];
 }
-export = EventDispatcher;
+export default FSEventDispatcher;
