@@ -8,7 +8,7 @@
     "start": "./node_modules/typescript/bin/tsc --watch"
   },
   "devDependencies": {
-    "typescript": "2.0.3"
+    "typescript": "2.0.7"
   },
   "repository": {
     "type": "git",
