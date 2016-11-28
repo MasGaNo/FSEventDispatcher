@@ -39,4 +39,5 @@ declare class FSEventDispatcher {
      **/
     triggerResult(eventName: string, ...args: any[]): any[];
 }
+export declare function eventdispatchable(target: Function): void;
 export default FSEventDispatcher;

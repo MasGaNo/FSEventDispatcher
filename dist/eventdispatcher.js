@@ -62,8 +62,8 @@
             this.internalList.push(callbackRemove);
             var returnValue = [];
             for (; currentIndex < this.list.length; ++currentIndex) {
-                var event_1 = this.list[currentIndex];
-                var returnVal = event_1.callback.apply(event_1.context, args);
+                var event = this.list[currentIndex];
+                var returnVal = event.callback.apply(event.context, args);
                 if (returnVal !== undefined) {
                     returnValue.push(returnVal);
                 }
@@ -167,6 +167,10 @@
         FSEventDispatcher.Mediator = new FSEventDispatcher();
         return FSEventDispatcher;
     }());
+    function eventdispatchable(target) {
+        Object.assign(target.prototype, FSEventDispatcher.prototype);
+    }
+    exports.eventdispatchable = eventdispatchable;
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.default = FSEventDispatcher;
 });

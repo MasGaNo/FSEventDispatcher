@@ -6,7 +6,10 @@
         "sourceMap": true,
         "outDir": "./dist",
         "declaration": true,
-        "removeComments": false
+        "removeComments": false,
+        "lib": [
+            "es6"
+        ]
     },
     "files": [
         "src/library/event/eventdispatcher.ts"
