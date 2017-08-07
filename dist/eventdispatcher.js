@@ -1,12 +1,14 @@
 (function (factory) {
-    if (typeof module === 'object' && typeof module.exports === 'object') {
-        var v = factory(require, exports); if (v !== undefined) module.exports = v;
+    if (typeof module === "object" && typeof module.exports === "object") {
+        var v = factory(require, exports);
+        if (v !== undefined) module.exports = v;
     }
-    else if (typeof define === 'function' && define.amd) {
+    else if (typeof define === "function" && define.amd) {
         define(["require", "exports"], factory);
     }
 })(function (require, exports) {
     'use strict';
+    Object.defineProperty(exports, "__esModule", { value: true });
     var Delegate = (function () {
         function Delegate() {
             this.internalList = [];
@@ -47,7 +49,7 @@
         Delegate.prototype.execute = function () {
             var args = [];
             for (var _i = 0; _i < arguments.length; _i++) {
-                args[_i - 0] = arguments[_i];
+                args[_i] = arguments[_i];
             }
             var currentIndex = 0;
             var callbackRemove = function (position) {
@@ -120,6 +122,20 @@
                 var events = this._events[name];
                 if (events) {
                     events.remove({ callback: callback, context: context });
+                    /*if (!callback && !context) {
+                        events.splice(0, events.length);
+                        continue;
+                    }
+                    for (var j = events.length - 1; j >= 0; --j) {
+                        var eventCallback = events[j];
+                        var remove = false;
+                        if ((!context && (eventCallback.callback === callback || eventCallback.callback._originalCallback === callback)) ||
+                            (!callback && eventCallback.context === context) ||
+                            (eventCallback.context === context && (eventCallback.callback === callback || eventCallback.callback._originalCallback === callback))
+                            ) {
+                            events.splice(j, 1);
+                        }
+                    }*/
                 }
             }
             return this;
@@ -171,7 +187,6 @@
         Object.assign(target.prototype, FSEventDispatcher.prototype);
     }
     exports.eventdispatchable = eventdispatchable;
-    Object.defineProperty(exports, "__esModule", { value: true });
     exports.default = FSEventDispatcher;
 });
 //# sourceMappingURL=eventdispatcher.js.map

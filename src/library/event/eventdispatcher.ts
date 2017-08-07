@@ -80,44 +80,44 @@ boubou
 		
 **/
 
-interface EventCallback {
+interface IEventCallback {
     callback: Function|any;
     context: any;
 }
 
 class Delegate {
 
-    private list: EventCallback[];
+    private list: IEventCallback[];
     private internalList: Function[] = [];
 
     public constructor() {
         this.list = [];
     }
 
-    public add(callback: EventCallback): void {
+    public add(callback: IEventCallback): void {
         this.list.push(callback);
     }
 
-    public remove(callbackParam: EventCallback): void {
+    public remove(callbackParam: IEventCallback): void {
 
-        var callback = callbackParam.callback;
-        var context = callbackParam.context;
+        const callback = callbackParam.callback;
+        const context = callbackParam.context;
 
         if (!callback && !context) {
             this.list.splice(0, this.list.length);
-            for (var i = 0; i < this.internalList.length; ++i) {
+            for (let i = 0; i < this.internalList.length; ++i) {
                 this.internalList[i](-1);
             }
             return;
         }
-        for (var j = this.list.length - 1; j >= 0; --j) {
-            var eventCallback = this.list[j];
+        for (let j = this.list.length - 1; j >= 0; --j) {
+            const eventCallback = this.list[j];
             if ((!context && (eventCallback.callback === callback || eventCallback.callback._originalCallback === callback)) ||
                 (!callback && eventCallback.context === context) ||
                 (eventCallback.context === context && (eventCallback.callback === callback || eventCallback.callback._originalCallback === callback))
                 ) {
                 this.list.splice(j, 1);
-                for (var i = 0; i < this.internalList.length; ++i) {
+                for (let i = 0; i < this.internalList.length; ++i) {
                     this.internalList[i](j);
                 }
             }
@@ -136,7 +136,7 @@ class Delegate {
 
         let currentIndex = 0;
 
-        let callbackRemove = function (position:number) {
+        const callbackRemove = function (position:number) {
             if (position === -1) {
                 currentIndex = 0;
                 return;
@@ -148,11 +148,11 @@ class Delegate {
 
         this.internalList.push(callbackRemove);
 
-		let returnValue: any[] = [];
+		const returnValue: any[] = [];
 		
         for (; currentIndex < this.list.length; ++currentIndex) {
-            let event: EventCallback = this.list[currentIndex];
-            let returnVal = event.callback.apply(event.context, args);
+            const event: IEventCallback = this.list[currentIndex];
+            const returnVal = event.callback.apply(event.context, args);
 			if (returnVal !== undefined) {
 				returnValue.push(returnVal);				
 			}
@@ -192,7 +192,7 @@ class FSEventDispatcher {
      * @param context Context of the callback to call
      **/
     public on(eventName: string, callback: Function, context?: any) {
-        var events: Delegate = this._events[eventName] || (this._events[eventName] = new Delegate());
+        const events: Delegate = this._events[eventName] || (this._events[eventName] = new Delegate());
         events.add({ callback: callback, context: context || this });
         return this;
     }
@@ -204,8 +204,8 @@ class FSEventDispatcher {
      * @param context Context of the callback to call
      **/
     public once(eventName: string, callback: Function, context?: any) {
-        var self = this;//not bind because we need to keep the trigger context
-        var onceCallback: any = function () {
+        const self = this;//not bind because we need to keep the trigger context
+        const onceCallback: any = function () {
             self.off(eventName, onceCallback, context);
             callback.apply(this, arguments);
         };
@@ -225,11 +225,11 @@ class FSEventDispatcher {
             return this;
         }
 
-        var eventNames = eventName ? [eventName] : Object.keys(this._events);
-        for (var i = 0, l = eventNames.length; i < l; ++i) {
-            var name = eventNames[i];
+        const eventNames = eventName ? [eventName] : Object.keys(this._events);
+        for (let i = 0, l = eventNames.length; i < l; ++i) {
+            const name = eventNames[i];
 
-            var events: Delegate = this._events[name];
+            const events: Delegate = this._events[name];
             if (events) {
                 events.remove({ callback: callback, context: context });
                 /*if (!callback && !context) {
@@ -257,7 +257,7 @@ class FSEventDispatcher {
      * @param args All arguments to pass to the callbacks.
      **/
     public trigger(eventName: string, ...args: any[]) {
-        var events = this._events[eventName];
+        const events = this._events[eventName];
         if (!events) {
             return this;
         }
@@ -278,7 +278,7 @@ class FSEventDispatcher {
      * @param args All arguments to pass to the callbacks.
      **/
     public triggerResult(eventName: string, ...args: any[]): any[] {
-        var events = this._events[eventName];
+        const events = this._events[eventName];
         if (!events) {
             return [];
         }
