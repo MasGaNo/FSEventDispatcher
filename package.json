@@ -1,5 +1,5 @@
 {
-  "name": "fseventdispatcher",
+  "name": "FSEventDispatcher",
   "version": "0.3.0",
   "description": "FSEventDispatcher, class of event management of Fantasite.JS",
   "main": "./dist/eventdispatcher.js",
