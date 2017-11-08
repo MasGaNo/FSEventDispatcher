@@ -95,6 +95,9 @@ class Delegate {
     }
 
     public add(callback: IEventCallback): void {
+	if (!callback || typeof callback.callback !== 'function') {
+	    throw new Error('Cannot add: Missing callback function.');
+	}
         this.list.push(callback);
     }
 
@@ -152,11 +155,6 @@ class Delegate {
 		
         for (; currentIndex < this.list.length; ++currentIndex) {
             const event: IEventCallback = this.list[currentIndex];
-		
-	    if (!event || typeof event.callback !== 'function') {
-	    	continue;
-	    }
-
             const returnVal = event.callback.apply(event.context, args);
 
 	    if (returnVal !== undefined) {
