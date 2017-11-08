@@ -152,10 +152,16 @@ class Delegate {
 		
         for (; currentIndex < this.list.length; ++currentIndex) {
             const event: IEventCallback = this.list[currentIndex];
+		
+	    if (!event || typeof event.callback !== 'function') {
+	    	continue;
+	    }
+
             const returnVal = event.callback.apply(event.context, args);
-			if (returnVal !== undefined) {
-				returnValue.push(returnVal);				
-			}
+
+	    if (returnVal !== undefined) {
+	        returnValue.push(returnVal);				
+	    }
         }
 
         this.internalList.splice(this.internalList.indexOf(callbackRemove), 1);
