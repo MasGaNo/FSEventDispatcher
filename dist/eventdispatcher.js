@@ -4,78 +4,13 @@
         if (v !== undefined) module.exports = v;
     }
     else if (typeof define === "function" && define.amd) {
-        define(["require", "exports"], factory);
+        define(["require", "exports", "./delegate"], factory);
     }
 })(function (require, exports) {
-    'use strict';
+    "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
-    var Delegate = (function () {
-        function Delegate() {
-            this.internalList = [];
-            this.list = [];
-        }
-        Delegate.prototype.add = function (callback) {
-            this.list.push(callback);
-        };
-        Delegate.prototype.remove = function (callbackParam) {
-            var callback = callbackParam.callback;
-            var context = callbackParam.context;
-            if (!callback && !context) {
-                this.list.splice(0, this.list.length);
-                for (var i = 0; i < this.internalList.length; ++i) {
-                    this.internalList[i](-1);
-                }
-                return;
-            }
-            for (var j = this.list.length - 1; j >= 0; --j) {
-                var eventCallback = this.list[j];
-                if ((!context && (eventCallback.callback === callback || eventCallback.callback._originalCallback === callback)) ||
-                    (!callback && eventCallback.context === context) ||
-                    (eventCallback.context === context && (eventCallback.callback === callback || eventCallback.callback._originalCallback === callback))) {
-                    this.list.splice(j, 1);
-                    for (var i = 0; i < this.internalList.length; ++i) {
-                        this.internalList[i](j);
-                    }
-                }
-            }
-            /*var indexOf = -1;
-            while ((indexOf = this.list.indexOf(callback) !== -1) {
-                this.list.splice(indexOf, 1);
-                for (var i = 0; i < Delegate.internalList.length; ++i) {
-                    Delegate.internalList[i](indexOf);
-                }
-            }*/
-        };
-        Delegate.prototype.execute = function () {
-            var args = [];
-            for (var _i = 0; _i < arguments.length; _i++) {
-                args[_i] = arguments[_i];
-            }
-            var currentIndex = 0;
-            var callbackRemove = function (position) {
-                if (position === -1) {
-                    currentIndex = 0;
-                    return;
-                }
-                if (currentIndex && currentIndex >= position) {
-                    --currentIndex;
-                }
-            };
-            this.internalList.push(callbackRemove);
-            var returnValue = [];
-            for (; currentIndex < this.list.length; ++currentIndex) {
-                var event = this.list[currentIndex];
-                var returnVal = event.callback.apply(event.context, args);
-                if (returnVal !== undefined) {
-                    returnValue.push(returnVal);
-                }
-            }
-            this.internalList.splice(this.internalList.indexOf(callbackRemove), 1);
-            return returnValue;
-        };
-        return Delegate;
-    }());
-    var FSEventDispatcher = (function () {
+    var delegate_1 = require("./delegate");
+    var FSEventDispatcher = /** @class */ (function () {
         function FSEventDispatcher() {
             this._events = {};
         }
@@ -86,7 +21,7 @@
          * @param context Context of the callback to call
          **/
         FSEventDispatcher.prototype.on = function (eventName, callback, context) {
-            var events = this._events[eventName] || (this._events[eventName] = new Delegate());
+            var events = this._events[eventName] || (this._events[eventName] = new delegate_1.Delegate());
             events.add({ callback: callback, context: context || this });
             return this;
         };
@@ -98,12 +33,13 @@
          **/
         FSEventDispatcher.prototype.once = function (eventName, callback, context) {
             var self = this; //not bind because we need to keep the trigger context
-            var onceCallback = function () {
+            var onceCallback = function (_) {
                 self.off(eventName, onceCallback, context);
-                callback.apply(this, arguments);
+                return callback.apply(this, arguments);
             };
+            // @ts-ignore
             onceCallback._originalCallback = callback;
-            return this.on(eventName, callback, context);
+            return this.on(eventName, onceCallback, context);
         };
         /**
          * Remove one or many callback for an event.
@@ -183,10 +119,25 @@
         FSEventDispatcher.Mediator = new FSEventDispatcher();
         return FSEventDispatcher;
     }());
-    function eventdispatchable(target) {
-        Object.assign(target.prototype, FSEventDispatcher.prototype);
-    }
-    exports.eventdispatchable = eventdispatchable;
+    // export function eventdispatchable(target: Function) {
+    //     Object.assign(target.prototype, FSEventDispatcher.prototype);
+    // }
     exports.default = FSEventDispatcher;
 });
+// interface Event {
+//     request: (id: string, type: 'album'|'track') => void;
+//     click: (e: FSEventDispatcher<any>) => number;
+// };
+// const e = new FSEventDispatcher<Event>();
+// e.on('click', (e: FSEventDispatcher<any>) => {
+//     return 42;
+// });
+// const onClick: Event['click'] = function (e: FSEventDispatcher<any>) {
+//     return 42;
+// }
+// e.on('request', (id:string, type: 'album'|'track') => {
+// });
+// e.trigger('request', 'le', 'album');
+// FSEventDispatcher.Mediator.on('test', () => {
+// });
 //# sourceMappingURL=eventdispatcher.js.map

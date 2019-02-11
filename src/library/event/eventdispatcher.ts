@@ -1,5 +1,4 @@
-﻿'use strict';
-
+﻿import { Delegate } from "./delegate";
 /**
 
 Test:
@@ -80,98 +79,18 @@ boubou
 		
 **/
 
-interface IEventCallback {
-    callback: Function|any;
-    context: any;
-}
+type IsCallback<T> = T extends (...args: any[]) => any ? T : never;
 
-class Delegate {
 
-    private list: IEventCallback[];
-    private internalList: Function[] = [];
+type TEventCallbackMap<T extends object> = {
+    [K in keyof T]: IsCallback<T[K]>;
+};
 
-    public constructor() {
-        this.list = [];
-    }
-
-    public add(callback: IEventCallback): void {
-        this.list.push(callback);
-    }
-
-    public remove(callbackParam: IEventCallback): void {
-
-        const callback = callbackParam.callback;
-        const context = callbackParam.context;
-
-        if (!callback && !context) {
-            this.list.splice(0, this.list.length);
-            for (let i = 0; i < this.internalList.length; ++i) {
-                this.internalList[i](-1);
-            }
-            return;
-        }
-        for (let j = this.list.length - 1; j >= 0; --j) {
-            const eventCallback = this.list[j];
-            if ((!context && (eventCallback.callback === callback || eventCallback.callback._originalCallback === callback)) ||
-                (!callback && eventCallback.context === context) ||
-                (eventCallback.context === context && (eventCallback.callback === callback || eventCallback.callback._originalCallback === callback))
-                ) {
-                this.list.splice(j, 1);
-                for (let i = 0; i < this.internalList.length; ++i) {
-                    this.internalList[i](j);
-                }
-            }
-        }
-	
-		/*var indexOf = -1;
-		while ((indexOf = this.list.indexOf(callback) !== -1) {
-			this.list.splice(indexOf, 1);
-			for (var i = 0; i < Delegate.internalList.length; ++i) {
-				Delegate.internalList[i](indexOf);
-			}
-		}*/
-    }
-
-    public execute(...args: any[]): any[] {
-
-        let currentIndex = 0;
-
-        const callbackRemove = function (position:number) {
-            if (position === -1) {
-                currentIndex = 0;
-                return;
-            }
-            if (currentIndex && currentIndex >= position) {
-                --currentIndex;
-            }
-        }
-
-        this.internalList.push(callbackRemove);
-
-		const returnValue: any[] = [];
-		
-        for (; currentIndex < this.list.length; ++currentIndex) {
-            const event: IEventCallback = this.list[currentIndex];
-            const returnVal = event.callback.apply(event.context, args);
-			if (returnVal !== undefined) {
-				returnValue.push(returnVal);				
-			}
-        }
-
-        this.internalList.splice(this.internalList.indexOf(callbackRemove), 1);
-		
-		return returnValue;
-
-    }
-
-}
-
-class FSEventDispatcher {
-
+class FSEventDispatcher<TEvent extends TEventCallbackMap<{}>> {
 	/**
 	 * Internal Mediator.
 	 */
-	public static Mediator = new FSEventDispatcher();
+	public static Mediator = new FSEventDispatcher<Record<string, (...args: Array<any>) => any>>();
 
     // replace by delegate to avoid some case like: 
     // model.once('change', function() {model.off('change')}); // should be triggered
@@ -179,7 +98,10 @@ class FSEventDispatcher {
     // or 
     // model.once('change', function() {console.log('foo')});
     // model.once('change', function() {console.log('bar')}); // crash.
-    private _events: { [s: string]: Delegate };
+    private _events: Partial<{ 
+        [P in keyof TEvent]: Delegate;
+        // [eventType: string]: Delegate;
+    }>;
 
     constructor() {
         this._events = {};
@@ -191,7 +113,7 @@ class FSEventDispatcher {
      * @param callback Callback to call when the event fires
      * @param context Context of the callback to call
      **/
-    public on(eventName: string, callback: Function, context?: any) {
+    public on<E extends keyof TEvent>(eventName: E, callback: IsCallback<TEvent[E]>, context?: any) {
         const events: Delegate = this._events[eventName] || (this._events[eventName] = new Delegate());
         events.add({ callback: callback, context: context || this });
         return this;
@@ -203,14 +125,15 @@ class FSEventDispatcher {
      * @param callback Callback to call when the event fires
      * @param context Context of the callback to call
      **/
-    public once(eventName: string, callback: Function, context?: any) {
+    public once<E extends keyof TEvent>(eventName: E, callback: IsCallback<TEvent[E]>, context?: any) {
         const self = this;//not bind because we need to keep the trigger context
-        const onceCallback: any = function () {
+        const onceCallback = function (_: any) {
             self.off(eventName, onceCallback, context);
-            callback.apply(this, arguments);
-        };
+            return callback.apply(this, arguments);
+        } as IsCallback<TEvent[E]>;
+        // @ts-ignore
         onceCallback._originalCallback = callback;
-        return this.on(eventName, callback, context);
+        return this.on(eventName, onceCallback, context);
     }
 
     /**
@@ -219,13 +142,13 @@ class FSEventDispatcher {
      * @param callback Callback to remove for the event. If null remove all callback with this `context` for the event.
      * @param context Context of the callback to remove. If null remove all callback with this callback.
      **/
-    public off(eventName?: string, callback?: Function, context?: any) {
+    public off<E extends keyof TEvent>(eventName?: E, callback?: IsCallback<TEvent[E]>, context?: any) {
         if (!eventName && !callback && !context) {
             this._events = {};// recursive clean?
             return this;
         }
 
-        const eventNames = eventName ? [eventName] : Object.keys(this._events);
+        const eventNames = eventName ? [eventName] : Object.keys(this._events) as Array<keyof TEvent>;
         for (let i = 0, l = eventNames.length; i < l; ++i) {
             const name = eventNames[i];
 
@@ -256,7 +179,7 @@ class FSEventDispatcher {
      * @param eventName Name of the event to triggered
      * @param args All arguments to pass to the callbacks.
      **/
-    public trigger(eventName: string, ...args: any[]) {
+    public trigger<E extends keyof TEvent>(eventName: E, ...args: Parameters<IsCallback<TEvent[E]>>) {
         const events = this._events[eventName];
         if (!events) {
             return this;
@@ -277,7 +200,7 @@ class FSEventDispatcher {
      * @param eventName Name of the event to triggered
      * @param args All arguments to pass to the callbacks.
      **/
-    public triggerResult(eventName: string, ...args: any[]): any[] {
+    public triggerResult<E extends keyof TEvent>(eventName: E, ...args: Parameters<IsCallback<TEvent[E]>>): ReturnType<IsCallback<TEvent[E]>>[] {
         const events = this._events[eventName];
         if (!events) {
             return [];
@@ -288,8 +211,33 @@ class FSEventDispatcher {
     }
 }
 
-export function eventdispatchable(target: Function) {
-    Object.assign(target.prototype, FSEventDispatcher.prototype);
-}
+// export function eventdispatchable(target: Function) {
+//     Object.assign(target.prototype, FSEventDispatcher.prototype);
+// }
 
 export default FSEventDispatcher;
+
+// interface Event {
+//     request: (id: string, type: 'album'|'track') => void;
+//     click: (e: FSEventDispatcher<any>) => number;
+// };
+
+// const e = new FSEventDispatcher<Event>();
+
+// e.on('click', (e: FSEventDispatcher<any>) => {
+//     return 42;
+// });
+
+// const onClick: Event['click'] = function (e: FSEventDispatcher<any>) {
+//     return 42;
+// }
+
+// e.on('request', (id:string, type: 'album'|'track') => {
+    
+// });
+
+// e.trigger('request', 'le', 'album');
+
+// FSEventDispatcher.Mediator.on('test', () => {
+
+// });
