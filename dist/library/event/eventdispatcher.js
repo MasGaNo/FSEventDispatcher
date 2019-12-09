@@ -119,6 +119,7 @@
         FSEventDispatcher.Mediator = new FSEventDispatcher();
         return FSEventDispatcher;
     }());
+    exports.FSEventDispatcher = FSEventDispatcher;
     // export function eventdispatchable(target: Function) {
     //     Object.assign(target.prototype, FSEventDispatcher.prototype);
     // }

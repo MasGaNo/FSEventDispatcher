@@ -81,7 +81,7 @@ declare type IsCallback<T> = T extends (...args: any[]) => any ? T : never;
 declare type TEventCallbackMap<T extends object> = {
     [K in keyof T]: IsCallback<T[K]>;
 };
-declare class FSEventDispatcher<TEvent extends TEventCallbackMap<{}>> {
+export declare class FSEventDispatcher<TEvent extends TEventCallbackMap<{}>> {
     /**
      * Internal Mediator.
      */
