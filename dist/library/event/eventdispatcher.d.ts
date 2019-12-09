@@ -1,3 +1,4 @@
+import { FSEventMediator } from './type-helper';
 /**
 
 Test:
@@ -81,6 +82,7 @@ declare type IsCallback<T> = T extends (...args: any[]) => any ? T : never;
 declare type TEventCallbackMap<T extends object> = {
     [K in keyof T]: IsCallback<T[K]>;
 };
+type MediatorMap = keyof FSEventMediator extends never ? Record<string, (...args: Array<any>) => any> : FSEventMediator;
 export declare class FSEventDispatcher<TEvent extends TEventCallbackMap<{}>> {
     /**
      * Internal Mediator.

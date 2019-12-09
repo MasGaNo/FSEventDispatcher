@@ -87,7 +87,6 @@ type TEventCallbackMap<T extends object> = {
     [K in keyof T]: IsCallback<T[K]>;
 };
 
-
 type MediatorMap = keyof FSEventMediator extends never ? Record<string, (...args: Array<any>) => any> : FSEventMediator;
 
 export class FSEventDispatcher<TEvent extends TEventCallbackMap<{}>> {
