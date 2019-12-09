@@ -2,8 +2,8 @@
   "name": "fseventdispatcher",
   "version": "0.6.0",
   "description": "FSEventDispatcher, class of event management of Fantasite.JS",
-  "main": "./dist/eventdispatcher.js",
-  "types": "./dist/eventdispatcher.d.ts",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "scripts": {
     "start": "./node_modules/.bin/tsc --watch"
   },
