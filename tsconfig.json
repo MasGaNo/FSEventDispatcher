@@ -7,13 +7,11 @@
         "outDir": "./dist",
         "declaration": true,
         "removeComments": false,
+        "rootDir": "./src",
         "lib": [
             "es6"
         ]
     },
-    "files": [
-        "src/library/event/eventdispatcher.ts"
-    ],
     "exclude": [
         "node_modules"
     ]
