@@ -288,4 +288,8 @@ class FSEventDispatcher {
     }
 }
 
+export function eventdispatchable(target: Function) {
+    Object.assign(target.prototype, FSEventDispatcher.prototype);
+}
+
 export default FSEventDispatcher;
