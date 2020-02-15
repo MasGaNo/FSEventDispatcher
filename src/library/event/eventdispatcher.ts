@@ -90,9 +90,9 @@ type TEventCallbackMap<T extends object> = {
 type MediatorMap = keyof FSEventMediator extends never ? Record<string, (...args: Array<any>) => any> : FSEventMediator;
 
 export class FSEventDispatcher<TEvent extends TEventCallbackMap<{}>> {
-	/**
-	 * Internal Mediator.
-	 */
+    /**
+     * Internal Mediator.
+     */
     public static Mediator = new FSEventDispatcher<MediatorMap>();
     // public static Mediator = new FSEventDispatcher<Record<string, (...args: Array<any>) => any>>();
 
@@ -199,7 +199,7 @@ export class FSEventDispatcher<TEvent extends TEventCallbackMap<{}>> {
         return this;
     }
 
-	/**
+    /**
      * Same as trigger method, but also return all values returned by callbacks except undefined value.
      * @param eventName Name of the event to triggered
      * @param args All arguments to pass to the callbacks.
@@ -214,7 +214,6 @@ export class FSEventDispatcher<TEvent extends TEventCallbackMap<{}>> {
 
     }
 }
-
 // export function eventdispatchable(target: Function) {
 //     Object.assign(target.prototype, FSEventDispatcher.prototype);
 // }
