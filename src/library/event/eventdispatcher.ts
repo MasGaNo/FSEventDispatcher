@@ -1,4 +1,5 @@
-﻿import { Delegate } from "./delegate";
+﻿import { Delegate } from './delegate';
+import { FSEventMediator } from './type-helper';
 /**
 
 Test:
@@ -86,11 +87,14 @@ type TEventCallbackMap<T extends object> = {
     [K in keyof T]: IsCallback<T[K]>;
 };
 
-class FSEventDispatcher<TEvent extends TEventCallbackMap<{}>> {
-	/**
-	 * Internal Mediator.
-	 */
-	public static Mediator = new FSEventDispatcher<Record<string, (...args: Array<any>) => any>>();
+type MediatorMap = keyof FSEventMediator extends never ? Record<string, (...args: Array<any>) => any> : FSEventMediator;
+
+export class FSEventDispatcher<TEvent extends TEventCallbackMap<{}>> {
+    /**
+     * Internal Mediator.
+     */
+    public static Mediator = new FSEventDispatcher<MediatorMap>();
+    // public static Mediator = new FSEventDispatcher<Record<string, (...args: Array<any>) => any>>();
 
     // replace by delegate to avoid some case like: 
     // model.once('change', function() {model.off('change')}); // should be triggered
@@ -98,7 +102,7 @@ class FSEventDispatcher<TEvent extends TEventCallbackMap<{}>> {
     // or 
     // model.once('change', function() {console.log('foo')});
     // model.once('change', function() {console.log('bar')}); // crash.
-    private _events: Partial<{ 
+    private _events: Partial<{
         [P in keyof TEvent]: Delegate;
         // [eventType: string]: Delegate;
     }>;
@@ -186,7 +190,7 @@ class FSEventDispatcher<TEvent extends TEventCallbackMap<{}>> {
         }
 
         events.execute.apply(events, args);
-		
+
         /*for (var i = 0; i < events.length; ++i) {
             var event: EventCallback = events[i];
             event.callback.apply(event.context, args);
@@ -194,8 +198,8 @@ class FSEventDispatcher<TEvent extends TEventCallbackMap<{}>> {
 
         return this;
     }
-	
-	/**
+
+    /**
      * Same as trigger method, but also return all values returned by callbacks except undefined value.
      * @param eventName Name of the event to triggered
      * @param args All arguments to pass to the callbacks.
@@ -207,10 +211,9 @@ class FSEventDispatcher<TEvent extends TEventCallbackMap<{}>> {
         }
 
         return events.execute.apply(events, args);
-		
+
     }
 }
-
 // export function eventdispatchable(target: Function) {
 //     Object.assign(target.prototype, FSEventDispatcher.prototype);
 // }
@@ -233,7 +236,7 @@ export default FSEventDispatcher;
 // }
 
 // e.on('request', (id:string, type: 'album'|'track') => {
-    
+
 // });
 
 // e.trigger('request', 'le', 'album');

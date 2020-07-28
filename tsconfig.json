@@ -1,20 +1,19 @@
 {
     "compilerOptions": {
-        "target": "es5",
+        "target": "ES5",
         "noImplicitAny": true,
-        "module": "umd",
+        "module": "CommonJS",
         "sourceMap": true,
-        "outDir": "./dist",
         "declaration": true,
         "removeComments": false,
+        "outDir": "./dist",                        /* Redirect output structure to the directory. */
+        "rootDir": "./src",                       /* Specify the root directory of input files. Use to control the output directory structure with --outDir. */
         "lib": [
-            "es6"
+            "ESNext"
         ]
     },
-    "files": [
-        "src/library/event/eventdispatcher.ts"
-    ],
     "exclude": [
-        "node_modules"
+        "node_modules",
+        "dist"
     ]
 }
